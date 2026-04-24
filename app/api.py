@@ -11,6 +11,8 @@ Endpoints:
 
 import os
 import uuid
+import logging
+import traceback
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException
@@ -22,6 +24,10 @@ from langchain_core.messages import HumanMessage, AIMessage
 from agent.graph import build_graph
 from agent.state import ALL_LEAD_FIELDS
 from agent.tools import get_all_leads
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # ── App setup ─────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -66,7 +72,12 @@ class ResetRequest(BaseModel):
 
 def _run_turn(session_id: str, user_message: str) -> dict:
     config = {"configurable": {"thread_id": session_id}}
-    existing = graph.get_state(config)
+
+    try:
+        existing = graph.get_state(config)
+    except Exception as e:
+        logger.error("Failed to get graph state for session '%s': %s\n%s", session_id, e, traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve session state: {str(e)}")
 
     if existing.values:
         inputs = {"messages": [HumanMessage(content=user_message)]}
@@ -81,11 +92,19 @@ def _run_turn(session_id: str, user_message: str) -> dict:
         }
 
     final = None
-    for chunk in graph.stream(inputs, config=config, stream_mode="values"):
-        final = chunk
+    try:
+        for chunk in graph.stream(inputs, config=config, stream_mode="values"):
+            final = chunk
+    except Exception as e:
+        logger.error("Graph stream error for session '%s': %s\n%s", session_id, e, traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Agent error: {str(e)}")
+
+    if final is None:
+        logger.warning("Graph stream produced no output for session '%s'", session_id)
+        raise HTTPException(status_code=500, detail="Agent returned no response. Check server logs.")
 
     ai_response = ""
-    if final and "messages" in final:
+    if "messages" in final:
         for m in reversed(final["messages"]):
             if isinstance(m, AIMessage):
                 ai_response = m.content
@@ -93,11 +112,11 @@ def _run_turn(session_id: str, user_message: str) -> dict:
 
     return {
         "response": ai_response,
-        "intent": final.get("intent") if final else None,
-        "lead_captured": final.get("lead_captured", False) if final else False,
-        "pending_fields": final.get("pending_fields", []) if final else [],
-        "lead_info": dict(final.get("lead_info", {})) if final else {},
-        "turn_count": final.get("turn_count", 0) if final else 0,
+        "intent": final.get("intent"),
+        "lead_captured": final.get("lead_captured", False),
+        "pending_fields": final.get("pending_fields", []),
+        "lead_info": dict(final.get("lead_info", {})),
+        "turn_count": final.get("turn_count", 0),
     }
 
 

@@ -1,3 +1,5 @@
+﻿import pathlib
+code = r'''
 import os, json, re
 from groq import Groq
 from langchain_core.messages import AIMessage, HumanMessage
@@ -99,3 +101,6 @@ def capture_lead(state: AgentState) -> dict:
     if not validate_email(email): return {}
     mock_lead_capture(name=name, email=email, platform=platform)
     return {"lead_captured": True, "pending_fields": []}
+'''
+pathlib.Path("agent/nodes.py").write_text(code.strip(), encoding="utf-8")
+print("nodes.py updated to Groq!")
