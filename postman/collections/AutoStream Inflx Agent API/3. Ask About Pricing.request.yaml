@@ -1,0 +1,33 @@
+$kind: http-request
+description: >-
+  Tests RAG retrieval — agent should respond with accurate pricing from the
+  knowledge base.
+
+
+  Expected: Agent returns Basic ($29/mo) and Pro ($79/mo) plan details.
+url: "{{base_url}}/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: >-
+    {
+      "message": "Tell me about your pricing plans. What does the Pro plan include?",
+      "session_id": "{{session_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('Intent is product_inquiry', () =>
+      pm.expect(body.intent).to.eql('product_inquiry'));
+
+      pm.test('Response mentions pricing', () => {
+        pm.expect(body.response.toLowerCase()).to.include('plan');
+      });
+    language: text/javascript
+order: 3000

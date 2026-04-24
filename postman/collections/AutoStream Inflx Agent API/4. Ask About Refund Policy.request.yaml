@@ -1,0 +1,27 @@
+$kind: http-request
+description: |-
+  Tests RAG retrieval for policy questions.
+
+  Expected: Agent responds with the 7-day money-back guarantee policy.
+url: "{{base_url}}/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "message": "What is your refund policy if I don't like it?",
+      "session_id": "{{session_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('Lead not captured yet', () =>
+      pm.expect(body.lead_captured).to.be.false);
+    language: text/javascript
+order: 4000

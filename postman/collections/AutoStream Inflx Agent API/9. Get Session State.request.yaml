@@ -1,0 +1,18 @@
+$kind: http-request
+description: Inspect the full conversation state including all messages and lead info.
+url: "{{base_url}}/session/{{session_id}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('Has messages', () =>
+      pm.expect(body.message_count).to.be.greaterThan(0));
+
+      pm.test('Lead is captured', () =>
+      pm.expect(body.lead_captured).to.be.true);
+    language: text/javascript
+order: 9000

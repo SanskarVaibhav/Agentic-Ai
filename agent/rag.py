@@ -9,8 +9,11 @@ with open(_KB_PATH, "r") as f:
 def _format_plans():
     lines = ["## AutoStream Pricing Plans\n"]
     for plan in _KB["plans"]:
-        lines.append(f"### {plan[\"name\"]} - ${plan[\"price_monthly\"]}/month")
-        lines.append(f"Best for: {plan[\"ideal_for\"]}")
+        name = plan["name"]
+        price = plan["price_monthly"]
+        ideal = plan["ideal_for"]
+        lines.append(f"### {name} - ${price}/month")
+        lines.append(f"Best for: {ideal}")
         lines.append("Features:")
         for feat in plan["features"]:
             lines.append(f"  - {feat}")
@@ -24,20 +27,26 @@ def _format_plans():
 def _format_policies():
     lines = ["## AutoStream Policies\n"]
     for p in _KB["policies"]:
-        lines.append(f"### {p[\"topic\"]}")
-        lines.append(p["details"])
+        topic = p["topic"]
+        details = p["details"]
+        lines.append(f"### {topic}")
+        lines.append(details)
         lines.append("")
     return "\n".join(lines)
 
 def _format_company():
     c = _KB["company"]
-    return f"## About AutoStream\n{c[\"description\"]}\nTagline: \"{c[\"tagline\"]}\"\n"
+    desc = c["description"]
+    tag = c["tagline"]
+    return f"## About AutoStream\n{desc}\nTagline: {tag}\n"
 
 def _format_faqs():
     lines = ["## FAQs\n"]
     for faq in _KB["faqs"]:
-        lines.append(f"Q: {faq[\"question\"]}")
-        lines.append(f"A: {faq[\"answer\"]}")
+        q = faq["question"]
+        a = faq["answer"]
+        lines.append(f"Q: {q}")
+        lines.append(f"A: {a}")
         lines.append("")
     return "\n".join(lines)
 

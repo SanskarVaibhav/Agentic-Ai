@@ -1,4 +1,4 @@
-﻿{
+{
   "company": {
     "name": "AutoStream",
     "description": "AutoStream is an AI-powered SaaS platform that provides automated video editing tools for content creators.",
@@ -9,30 +9,80 @@
       "name": "Basic Plan",
       "price_monthly": 29,
       "price_annual": 249,
-      "features": ["10 videos per month","720p resolution exports","Basic auto-cut and trim","Background music library (50+ tracks)","Standard templates (20+)","Email support (48-hour response time)","1 user seat","5 GB cloud storage"],
+      "features": [
+        "10 videos per month",
+        "720p resolution exports",
+        "Basic auto-cut and trim",
+        "Standard templates",
+        "Email support",
+        "1 user seat",
+        "5 GB cloud storage"
+      ],
       "ideal_for": "Hobbyists and beginner content creators",
-      "limitations": ["No AI captions","No 4K export","No priority support","No API access"]
+      "limitations": [
+        "No AI captions",
+        "No 4K export",
+        "No priority support",
+        "No API access"
+      ]
     },
     {
       "name": "Pro Plan",
       "price_monthly": 79,
       "price_annual": 699,
-      "features": ["Unlimited videos per month","4K resolution exports","Advanced AI editing suite","AI-powered auto-captions in 30+ languages","Background noise removal","Premium templates (200+)","Brand kit","Priority 24/7 live chat and phone support","3 user seats","100 GB cloud storage","API access","Analytics dashboard"],
-      "ideal_for": "Professional content creators, agencies, and growing channels",
+      "features": [
+        "Unlimited videos per month",
+        "4K resolution exports",
+        "AI-powered auto-captions",
+        "Background noise removal",
+        "Premium templates",
+        "Priority 24/7 support",
+        "3 user seats",
+        "100 GB cloud storage",
+        "API access"
+      ],
+      "ideal_for": "Professional content creators and agencies",
       "limitations": []
     }
   ],
   "policies": [
-    {"topic": "Refund Policy","details": "AutoStream offers a 7-day money-back guarantee. Refunds are not available after the 7-day window. Contact support@autostream.io."},
-    {"topic": "Support Policy","details": "24/7 live chat and phone support is exclusively available for Pro Plan subscribers. Basic Plan users receive email support with a 48-hour response time."},
-    {"topic": "Cancellation Policy","details": "Users can cancel at any time. Cancellation takes effect at the end of the current billing cycle."},
-    {"topic": "Free Trial","details": "AutoStream offers a 14-day free trial for new users on the Pro Plan. No credit card required."},
-    {"topic": "Team & Enterprise","details": "For teams larger than 3 users, AutoStream offers custom pricing. Contact sales@autostream.io."}
+    {
+      "topic": "Refund Policy",
+      "details": "AutoStream offers a 7-day money-back guarantee. Refunds are not available after 7 days."
+    },
+    {
+      "topic": "Support Policy",
+      "details": "24/7 live chat support is exclusively for Pro Plan subscribers. Basic Plan gets email support with 48-hour response time."
+    },
+    {
+      "topic": "Cancellation Policy",
+      "details": "Users can cancel at any time. Cancellation takes effect at end of billing cycle."
+    },
+    {
+      "topic": "Free Trial",
+      "details": "14-day free trial for new Pro Plan users. No credit card required."
+    },
+    {
+      "topic": "Enterprise",
+      "details": "For teams larger than 3 users, contact sales@autostream.io for custom pricing."
+    }
   ],
   "faqs": [
-    {"question": "What platforms does AutoStream support?","answer": "Exports are optimized for YouTube, Instagram Reels, TikTok, Facebook, Twitter/X, and LinkedIn."},
-    {"question": "Do I need video editing experience?","answer": "Not at all! AutoStream is designed to be beginner-friendly. The AI handles the heavy lifting."},
-    {"question": "Can I upgrade or downgrade my plan?","answer": "Yes, you can upgrade or downgrade at any time from your account settings."},
-    {"question": "Is my video data secure?","answer": "Yes. AutoStream uses AES-256 encryption. Your videos are never used for training AI models without consent."}
+    {
+      "question": "What platforms does AutoStream support?",
+      "answer": "Exports are optimized for YouTube, Instagram Reels, TikTok, Facebook, and LinkedIn."
+    },
+    {
+      "question": "Do I need video editing experience?",
+      "answer": "Not at all. AutoStream is beginner-friendly and AI handles the heavy lifting."
+    },
+    {
+      "question": "Can I upgrade or downgrade?",
+      "answer": "Yes, anytime from your account settings."
+    },
+    {
+      "question": "Is my data secure?",
+      "answer": "Yes. AutoStream uses AES-256 encryption and never uses your videos for AI training without consent."
+    }
   ]
 }

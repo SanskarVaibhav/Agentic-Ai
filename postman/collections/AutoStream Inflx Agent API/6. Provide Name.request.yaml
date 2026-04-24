@@ -1,0 +1,33 @@
+$kind: http-request
+description: |-
+  Tests lead field collection — name extraction.
+
+  Expected:
+  - lead_info.name = 'Alex Rivera'
+  - Agent asks for email next
+  - lead_captured = false
+url: "{{base_url}}/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "message": "My name is Alex Rivera",
+      "session_id": "{{session_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('Name collected', () =>
+      pm.expect(body.lead_info.name).to.be.a('string').and.not.empty);
+
+      pm.test('Lead NOT captured yet', () =>
+      pm.expect(body.lead_captured).to.be.false);
+    language: text/javascript
+order: 6000

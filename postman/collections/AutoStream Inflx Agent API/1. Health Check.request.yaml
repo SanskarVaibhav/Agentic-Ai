@@ -1,0 +1,15 @@
+$kind: http-request
+description: Verify the API server is running and healthy.
+url: "{{base_url}}/health"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+      pm.test('Service is running', () => {
+        const body = pm.response.json();
+        pm.expect(body.status).to.eql('ok');
+      });
+    language: text/javascript
+examples: ./.resources/1. Health Check.resources/examples
+order: 1000

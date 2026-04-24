@@ -1,0 +1,26 @@
+$kind: http-request
+description: |-
+  Returns all leads captured in this server session.
+
+  Expected: At least 1 lead with name, email, platform, lead_id.
+url: "{{base_url}}/leads"
+method: GET
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('At least 1 lead captured', () =>
+      pm.expect(body.total).to.be.greaterThan(0));
+
+      pm.test('Lead has required fields', () => {
+        const lead = body.leads[0];
+        pm.expect(lead.name).to.be.a('string');
+        pm.expect(lead.email).to.include('@');
+        pm.expect(lead.platform).to.be.a('string');
+        pm.expect(lead.lead_id).to.include('LEAD-');
+      });
+    language: text/javascript
+order: 10000

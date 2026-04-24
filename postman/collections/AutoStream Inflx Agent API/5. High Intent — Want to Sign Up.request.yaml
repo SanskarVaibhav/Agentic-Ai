@@ -1,0 +1,36 @@
+$kind: http-request
+description: |-
+  Tests high-intent detection.
+
+  Expected:
+  - intent = 'high_intent'
+  - Agent asks for user's name (first lead field)
+  - lead_captured = false (too early)
+url: "{{base_url}}/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: >-
+    {
+      "message": "That sounds great! I want to sign up for the Pro plan for my YouTube channel.",
+      "session_id": "{{session_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('Intent detected as high_intent', () =>
+      pm.expect(body.intent).to.eql('high_intent'));
+
+      pm.test('Lead NOT captured yet', () =>
+      pm.expect(body.lead_captured).to.be.false);
+
+      pm.test('Pending fields still exist', () =>
+      pm.expect(body.pending_fields.length).to.be.greaterThan(0));
+    language: text/javascript
+order: 5000

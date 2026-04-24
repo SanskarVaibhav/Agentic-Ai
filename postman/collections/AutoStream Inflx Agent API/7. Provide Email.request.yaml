@@ -1,0 +1,33 @@
+$kind: http-request
+description: |-
+  Tests email extraction and validation.
+
+  Expected:
+  - lead_info.email = 'alex.rivera@gmail.com'
+  - Agent asks for platform next
+  - lead_captured = false
+url: "{{base_url}}/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "message": "alex.rivera@gmail.com",
+      "session_id": "{{session_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('Email collected', () =>
+      pm.expect(body.lead_info.email).to.include('@'));
+
+      pm.test('Lead NOT captured yet', () =>
+      pm.expect(body.lead_captured).to.be.false);
+    language: text/javascript
+order: 7000

@@ -1,0 +1,22 @@
+$kind: http-request
+description: |-
+  Resets the conversation session — clears history and lead info.
+  Useful for starting a fresh conversation with the same session_id.
+url: "{{base_url}}/chat/reset"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "session_id": "{{session_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+      const body = pm.response.json();
+      pm.test('Status is reset', () => pm.expect(body.status).to.eql('reset'));
+    language: text/javascript
+order: 11000

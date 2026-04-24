@@ -1,0 +1,39 @@
+$kind: http-request
+description: |-
+  Final lead field — triggers mock_lead_capture().
+
+  Expected:
+  - lead_info.platform = 'Youtube'
+  - lead_captured = TRUE
+  - pending_fields = []
+  - Server console prints LEAD CAPTURED SUCCESSFULLY
+url: "{{base_url}}/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "message": "I create on YouTube",
+      "session_id": "{{session_id}}"
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.test('LEAD CAPTURED', () => pm.expect(body.lead_captured).to.be.true);
+
+      pm.test('No pending fields', () =>
+      pm.expect(body.pending_fields.length).to.eql(0));
+
+      pm.test('All lead fields present', () => {
+        pm.expect(body.lead_info.name).to.be.a('string');
+        pm.expect(body.lead_info.email).to.include('@');
+        pm.expect(body.lead_info.platform).to.be.a('string');
+      });
+    language: text/javascript
+order: 8000

@@ -1,0 +1,33 @@
+$kind: http-request
+description: |-
+  Start a brand new session. No session_id needed — one is auto-generated.
+
+  The test script saves the session_id to the collection variable automatically.
+url: "{{base_url}}/chat"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: >-
+    {
+      "message": "Hi! I am looking for a video editing tool for my YouTube channel."
+    }
+scripts:
+  - type: afterResponse
+    code: >-
+      pm.test('Status is 200', () => pm.response.to.have.status(200));
+
+      const body = pm.response.json();
+
+      pm.collectionVariables.set('session_id', body.session_id);
+
+      console.log('Session ID saved:', body.session_id);
+
+      pm.test('Session ID returned', () =>
+      pm.expect(body.session_id).to.be.a('string'));
+
+      pm.test('Response text exists', () =>
+      pm.expect(body.response).to.be.a('string').and.not.empty);
+    language: text/javascript
+order: 2000

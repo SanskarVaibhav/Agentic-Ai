@@ -1,0 +1,15 @@
+# Use this workspace to collaborate
+workspace:
+  id: 80e90661-5ef8-4cd0-8385-7196dd5e6a39
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ..\postman\collections\AutoStream Inflx Agent API: 0b108514-f48f-4d25-8f09-e1d83d533afa
+
+# All resources in the `postman/` folder are automatically registered in Local View.
+# Point to additional files outside the `postman/` folder to register them individually. Example:
+#localResources:
+#  collections:
+#    - ../tests/E2E Test Collection/

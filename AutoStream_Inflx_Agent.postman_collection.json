@@ -1,0 +1,383 @@
+{
+  "info": {
+    "name": "AutoStream Inflx Agent API",
+    "_postman_id": "inflx-autostream-2026",
+    "description": "API collection for the AutoStream Social-to-Lead Agentic Workflow.\n\nFlow:\n1. Start with **Health Check** to verify the server is running.\n2. Use **New Chat Session** to start a conversation — copy the `session_id` from the response.\n3. Use **Continue Conversation** with the same `session_id` for follow-up messages.\n4. Monitor state with **Get Session State**.\n5. View captured leads with **List All Leads**.\n\nExpected demo conversation:\n- Greeting → pricing inquiry → high intent → name → email → platform → lead captured!",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string",
+      "description": "Auto-set after first chat request. Copy from response or let the test script set it."
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Verify the API server is running and healthy."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"status\": \"ok\",\n  \"service\": \"AutoStream Inflx Agent API\",\n  \"version\": \"1.0.0\"\n}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('Service is running', () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.status).to.eql('ok');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. New Chat — Greeting",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Hi! I am looking for a video editing tool for my YouTube channel.\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat",
+          "host": ["{{base_url}}"],
+          "path": ["chat"]
+        },
+        "description": "Start a brand new session. No session_id needed — one is auto-generated.\n\nThe test script saves the session_id to the collection variable automatically."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.collectionVariables.set('session_id', body.session_id);",
+              "console.log('Session ID saved:', body.session_id);",
+              "pm.test('Session ID returned', () => pm.expect(body.session_id).to.be.a('string'));",
+              "pm.test('Response text exists', () => pm.expect(body.response).to.be.a('string').and.not.empty);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Ask About Pricing",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"Tell me about your pricing plans. What does the Pro plan include?\",\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat",
+          "host": ["{{base_url}}"],
+          "path": ["chat"]
+        },
+        "description": "Tests RAG retrieval — agent should respond with accurate pricing from the knowledge base.\n\nExpected: Agent returns Basic ($29/mo) and Pro ($79/mo) plan details."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Intent is product_inquiry', () => pm.expect(body.intent).to.eql('product_inquiry'));",
+              "pm.test('Response mentions pricing', () => {",
+              "  pm.expect(body.response.toLowerCase()).to.include('plan');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Ask About Refund Policy",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"What is your refund policy if I don't like it?\",\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat",
+          "host": ["{{base_url}}"],
+          "path": ["chat"]
+        },
+        "description": "Tests RAG retrieval for policy questions.\n\nExpected: Agent responds with the 7-day money-back guarantee policy."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Lead not captured yet', () => pm.expect(body.lead_captured).to.be.false);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. High Intent — Want to Sign Up",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"That sounds great! I want to sign up for the Pro plan for my YouTube channel.\",\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat",
+          "host": ["{{base_url}}"],
+          "path": ["chat"]
+        },
+        "description": "Tests high-intent detection.\n\nExpected:\n- intent = 'high_intent'\n- Agent asks for user's name (first lead field)\n- lead_captured = false (too early)"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Intent detected as high_intent', () => pm.expect(body.intent).to.eql('high_intent'));",
+              "pm.test('Lead NOT captured yet', () => pm.expect(body.lead_captured).to.be.false);",
+              "pm.test('Pending fields still exist', () => pm.expect(body.pending_fields.length).to.be.greaterThan(0));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Provide Name",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"My name is Alex Rivera\",\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat",
+          "host": ["{{base_url}}"],
+          "path": ["chat"]
+        },
+        "description": "Tests lead field collection — name extraction.\n\nExpected:\n- lead_info.name = 'Alex Rivera'\n- Agent asks for email next\n- lead_captured = false"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Name collected', () => pm.expect(body.lead_info.name).to.be.a('string').and.not.empty);",
+              "pm.test('Lead NOT captured yet', () => pm.expect(body.lead_captured).to.be.false);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Provide Email",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"alex.rivera@gmail.com\",\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat",
+          "host": ["{{base_url}}"],
+          "path": ["chat"]
+        },
+        "description": "Tests email extraction and validation.\n\nExpected:\n- lead_info.email = 'alex.rivera@gmail.com'\n- Agent asks for platform next\n- lead_captured = false"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Email collected', () => pm.expect(body.lead_info.email).to.include('@'));",
+              "pm.test('Lead NOT captured yet', () => pm.expect(body.lead_captured).to.be.false);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Provide Platform — TRIGGERS LEAD CAPTURE",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"I create on YouTube\",\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat",
+          "host": ["{{base_url}}"],
+          "path": ["chat"]
+        },
+        "description": "Final lead field — triggers mock_lead_capture().\n\nExpected:\n- lead_info.platform = 'Youtube'\n- lead_captured = TRUE\n- pending_fields = []\n- Server console prints LEAD CAPTURED SUCCESSFULLY"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('LEAD CAPTURED', () => pm.expect(body.lead_captured).to.be.true);",
+              "pm.test('No pending fields', () => pm.expect(body.pending_fields.length).to.eql(0));",
+              "pm.test('All lead fields present', () => {",
+              "  pm.expect(body.lead_info.name).to.be.a('string');",
+              "  pm.expect(body.lead_info.email).to.include('@');",
+              "  pm.expect(body.lead_info.platform).to.be.a('string');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Get Session State",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/session/{{session_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["session", "{{session_id}}"]
+        },
+        "description": "Inspect the full conversation state including all messages and lead info."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Has messages', () => pm.expect(body.message_count).to.be.greaterThan(0));",
+              "pm.test('Lead is captured', () => pm.expect(body.lead_captured).to.be.true);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. List All Captured Leads",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/leads",
+          "host": ["{{base_url}}"],
+          "path": ["leads"]
+        },
+        "description": "Returns all leads captured in this server session.\n\nExpected: At least 1 lead with name, email, platform, lead_id."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('At least 1 lead captured', () => pm.expect(body.total).to.be.greaterThan(0));",
+              "pm.test('Lead has required fields', () => {",
+              "  const lead = body.leads[0];",
+              "  pm.expect(lead.name).to.be.a('string');",
+              "  pm.expect(lead.email).to.include('@');",
+              "  pm.expect(lead.platform).to.be.a('string');",
+              "  pm.expect(lead.lead_id).to.include('LEAD-');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Reset Session",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": {
+          "raw": "{{base_url}}/chat/reset",
+          "host": ["{{base_url}}"],
+          "path": ["chat", "reset"]
+        },
+        "description": "Resets the conversation session — clears history and lead info.\nUseful for starting a fresh conversation with the same session_id."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test('Status is reset', () => pm.expect(body.status).to.eql('reset'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ]
+}
