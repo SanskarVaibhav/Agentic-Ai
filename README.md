@@ -358,7 +358,3 @@ python-dotenv             # Environment variable management
 
 
 ---
-
-## 📄 License
-
-MIT License — built for the ServiceHive Inflx ML Intern Assignment.
