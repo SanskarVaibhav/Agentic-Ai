@@ -355,7 +355,7 @@ python-dotenv             # Environment variable management
 ## 👨‍💻 Author
 
 **Sanskar Vaibhav**
-Machine Learning Intern Assignment — ServiceHive | Inflx
+
 
 ---
 
