@@ -10,7 +10,6 @@
 
 **An AI-powered conversational agent that converts social media conversations into qualified business leads.**
 
-*Machine Learning Intern Assignment | ServiceHive | Product: Inflx*
 
 </div>
 
